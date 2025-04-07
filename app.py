@@ -1,7 +1,8 @@
 import os
 import signal
-from flask import Flask
+from flask import Flask, request, jsonify
 from dotenv import load_dotenv
+from vision_wrapper import analyze_image_with_openai
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,23 +22,21 @@ def home():
         <head><title>Adapp</title></head>
         <body style='font-family:sans-serif;padding:40px;'>
             <h1>✅ Adapp backend is live!</h1>
-            <p>This is your Flask app running on Replit. You’re golden. 💛</p>
+            <p>This is your Flask app running on Render. You’re golden. 💛</p>
         </body>
     </html>
     """
 
-from flask import request, jsonify
-from vision_wrapper import analyze_image_with_openai
-
+# Visual triage image analysis route
 @app.route("/analyzeImage", methods=["POST"])
 def analyze_image():
     data = request.get_json()
-    base64_image = data.get("image")
+    image_url = data.get("image")
 
-    if not base64_image:
+    if not image_url:
         return jsonify({"error": "Missing 'image' in request body."}), 400
 
-    result = analyze_image_with_openai(base64_image)
+    result = analyze_image_with_openai(image_url)
     return jsonify({"result": result})
 
 # Graceful shutdown function
@@ -51,9 +50,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, shutdown_server)
     signal.signal(signal.SIGINT, shutdown_server)
 
-    # Start Flask app on Replit-compatible settings
+    port = int(os.environ.get("PORT", 5000))  # Use PORT from Render, fallback to 5000 for local
     app.run(
         host="0.0.0.0",
-        port=3000,
+        port=port,
         debug=(ENVIRONMENT == "development")
     )
