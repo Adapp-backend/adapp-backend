@@ -5,7 +5,7 @@ import openai
 # Load the OpenAI API key from the environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def analyze_image_with_openai(base64_image):
+def analyze_image_with_openai(image_url):
     prompt = (
         "You are an ADHD productivity coach. A user uploaded a photo of their room "
         "to figure out how to get started cleaning. Analyze the photo and list 3 small, "
@@ -28,7 +28,7 @@ def analyze_image_with_openai(base64_image):
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": base64_image,
+                                "url": image_url,  # <- FIXED THIS LINE
                                 "detail": "auto"
                             }
                         }
