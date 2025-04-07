@@ -13,9 +13,13 @@ def analyze_image_with_openai(base64_image):
         "Return the list as plain text with no explanations. Format as a bullet list."
     )
 
+    model_name = os.getenv("OPENAI_MODEL_NAME")
+    if not model_name:
+        raise ValueError("OPENAI_MODEL_NAME environment variable is not set.")
+
     try:
         response = openai.ChatCompletion.create(
-            model=os.getenv("OPENAI_MODEL_NAME", "gpt-4-vision-preview"),
+            model=model_name,
             messages=[
                 {
                     "role": "user",
