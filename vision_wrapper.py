@@ -1,9 +1,8 @@
-# vision_wrapper.py
 import os
 import openai
 
-# Load the OpenAI API key from the environment
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Set up client for the new SDK
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def analyze_image_with_openai(image_url):
     prompt = (
@@ -18,7 +17,7 @@ def analyze_image_with_openai(image_url):
         raise ValueError("OPENAI_MODEL_NAME environment variable is not set.")
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model=model_name,
             messages=[
                 {
@@ -28,7 +27,7 @@ def analyze_image_with_openai(image_url):
                         {
                             "type": "image_url",
                             "image_url": {
-                                "url": image_url,  # <- FIXED THIS LINE
+                                "url": image_url,
                                 "detail": "auto"
                             }
                         }
@@ -37,8 +36,7 @@ def analyze_image_with_openai(image_url):
             ],
             max_tokens=300,
         )
-
-        return response['choices'][0]['message']['content'].strip()
+        return response.choices[0].message.content.strip()
 
     except Exception as e:
         print("❌ OpenAI Vision API Error:", e)
