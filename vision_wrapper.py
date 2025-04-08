@@ -1,16 +1,8 @@
 import os
 import openai
 
-# Load API key and model name from environment
-api_key = os.getenv("OPENAI_API_KEY")
-model_name = os.getenv("OPENAI_MODEL_NAME")
-
-# Log them (safe) for debugging
-print(f"🔍 Loaded model: {model_name}")
-print(f"🔑 API key starts with: {api_key[:8]}...")
-
-# Set up OpenAI client
-client = openai.OpenAI(api_key=api_key)
+# Set up client for the new SDK
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def analyze_image_with_openai(image_url):
     prompt = (
@@ -20,8 +12,8 @@ def analyze_image_with_openai(image_url):
         "Return the list as plain text with no explanations. Format as a bullet list."
     )
 
-    if not model_name:
-        raise ValueError("❌ OPENAI_MODEL_NAME is not set in environment.")
+    # Use gpt-4o (multimodal) as the default model
+    model_name = os.getenv("OPENAI_MODEL_NAME", "gpt-4o")
 
     try:
         response = client.chat.completions.create(
@@ -45,6 +37,17 @@ def analyze_image_with_openai(image_url):
         )
         return response.choices[0].message.content.strip()
 
+    except openai.APIError as e:
+        print("❌ OpenAI API Error:", e)
+        return f"⚠️ API error: {str(e)}"
+
+    except openai.AuthenticationError:
+        return "🔐 Authentication error: Check your API key or permissions."
+
+    except openai.BadRequestError as e:
+        print("🚫 Bad Request Error:", e)
+        return f"⚠️ Bad request: {str(e)}"
+
     except Exception as e:
-        print("❌ OpenAI Vision API Error:", e)
+        print("❌ Unexpected Error:", e)
         return "⚠️ Error analyzing image."
