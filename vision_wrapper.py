@@ -1,8 +1,16 @@
 import os
 import openai
 
-# Set up client for the new SDK
-client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load API key and model name from environment
+api_key = os.getenv("OPENAI_API_KEY")
+model_name = os.getenv("OPENAI_MODEL_NAME")
+
+# Log them (safe) for debugging
+print(f"🔍 Loaded model: {model_name}")
+print(f"🔑 API key starts with: {api_key[:8]}...")
+
+# Set up OpenAI client
+client = openai.OpenAI(api_key=api_key)
 
 def analyze_image_with_openai(image_url):
     prompt = (
@@ -12,9 +20,8 @@ def analyze_image_with_openai(image_url):
         "Return the list as plain text with no explanations. Format as a bullet list."
     )
 
-    model_name = os.getenv("OPENAI_MODEL_NAME")
     if not model_name:
-        raise ValueError("OPENAI_MODEL_NAME environment variable is not set.")
+        raise ValueError("❌ OPENAI_MODEL_NAME is not set in environment.")
 
     try:
         response = client.chat.completions.create(
